@@ -57,3 +57,37 @@ to it:
 var depLinker = require('dep-linker');
 depLinker.setRoot('../../');
 ```
+
+## Windows
+
+On Windows the default 'Dir' symlink requires Administrator rights. Event if the executing User 
+is in the Administrator group it refuses to create a 'Dir' symlink. The module could technically
+cause a UAC prompt by using spawning a child process with Verb: RunAs, however it becomes difficult
+to manage the inputs and outputs of the spawned process. In Window, a Junction symbolic link works
+exactly the way Developers would expect and does not require the same elevated prompt as a 'Dir' symlink.
+
+The latest update allows this npm module to run on windows by creating Junction links instead of Dir links
+by default. If you are running on Windows and want the old functionality back, perhaps you've setup your
+scripts to run in elevated mode, you can use the new options object.
+
+### Gulp
+``` javascript
+var depLinker = require('dep-linker');
+
+// Enable Legacy symlinks for Windows only. Linux and OS-X are not affected
+// by the options object at this time.
+gulp.task('link-dependencies', function () {
+  return depLinker.linkDependenciesTo('./public/scripts', {type: 'dir'});
+});
+
+// Default way on Windows only. Linux and OS-X are not effected by options at this time.
+gulp.task('link-dependencies', function () {
+  return depLinker.linkDependenciesTo('./public/scripts', {type: 'junction'});
+});
+
+// Is the same as: (The following task works on all platforms now and
+// creates symbolic links as expected)
+gulp.task('link-dependencies', function () {   
+  return depLinker.linkDependenciesTo('./public/scripts');
+});  
+```
